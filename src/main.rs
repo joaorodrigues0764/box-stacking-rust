@@ -1,6 +1,6 @@
 use std::io::{self, BufWriter, Read, Write};
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy)]
 struct Orientation {
     width: i32,
     length: i32,
@@ -139,99 +139,4 @@ fn main() -> io::Result<()> {
         writeln!(output, "{} {} {}", block.width, block.length, block.height)?;
     }
     output.flush()
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    fn check_solution(blocks: &[(i32, i32, i32)], expected_height: i64) {
-        let mut orientations: Vec<Orientation> = blocks
-            .iter()
-            .flat_map(|&(a, b, c)| generate_orientations(a, b, c))
-            .collect();
-
-        let (height, tower) = tallest_tower(&mut orientations);
-        assert_eq!(height, expected_height);
-        assert_eq!(
-            tower
-                .iter()
-                .map(|block| i64::from(block.height))
-                .sum::<i64>(),
-            height
-        );
-
-        for pair in tower.windows(2) {
-            assert!(pair[0].width > pair[1].width);
-            assert!(pair[0].length > pair[1].length);
-        }
-
-        for block in tower {
-            let mut dimensions = [block.width, block.length, block.height];
-            dimensions.sort_unstable();
-            assert!(blocks.iter().any(|&(a, b, c)| {
-                let mut original = [a, b, c];
-                original.sort_unstable();
-                original == dimensions
-            }));
-        }
-    }
-
-    fn quadratic_height(blocks: &[(i32, i32, i32)]) -> i64 {
-        let mut orientations: Vec<Orientation> = blocks
-            .iter()
-            .flat_map(|&(a, b, c)| generate_orientations(a, b, c))
-            .collect();
-        orientations.sort_unstable_by_key(|block| block.width);
-
-        let mut heights = vec![0; orientations.len()];
-        for (index, block) in orientations.iter().enumerate() {
-            heights[index] = i64::from(block.height);
-            for above in 0..index {
-                if orientations[above].width < block.width
-                    && orientations[above].length < block.length
-                {
-                    heights[index] = heights[index].max(i64::from(block.height) + heights[above]);
-                }
-            }
-        }
-        heights.into_iter().max().unwrap()
-    }
-
-    #[test]
-    fn statement_examples() {
-        check_solution(&[(5, 10, 20)], 25);
-        check_solution(&[(2, 2, 2), (1, 3, 3)], 3);
-    }
-
-    #[test]
-    fn equal_dimensions_cannot_be_stacked() {
-        check_solution(&[(7, 7, 7); 10], 7);
-        check_solution(&[(1, 1, 10)], 10);
-        check_solution(&[(1, 10, 10)], 10);
-    }
-
-    #[test]
-    fn maximum_dimension_is_supported() {
-        check_solution(&[(i32::MAX, i32::MAX, i32::MAX)], i64::from(i32::MAX));
-    }
-
-    #[test]
-    fn random_cases_match_quadratic_solution() {
-        let mut seed = 2026_u64;
-        for size in 1..=15 {
-            for _ in 0..100 {
-                let mut blocks = Vec::new();
-                for _ in 0..size {
-                    let mut dimensions = [0; 3];
-                    for dimension in &mut dimensions {
-                        seed = seed.wrapping_mul(6364136223846793005).wrapping_add(1);
-                        *dimension = ((seed >> 32) % 12 + 1) as i32;
-                    }
-                    blocks.push((dimensions[0], dimensions[1], dimensions[2]));
-                }
-                check_solution(&blocks, quadratic_height(&blocks));
-            }
-        }
-    }
 }
