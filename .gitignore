@@ -1,1 +1,21 @@
-/target
+# Rust / Cargo
+/target/
+
+# Compiled executables
+/asa
+/gerador
+
+# Generated test inputs and outputs
+/teste_*.in
+/resultado.out
+
+# Generated benchmark results
+/benchmarks/results_final/
+
+# Local reports
+/Relatorio_Projeto_ASA_TP021.pdf
+
+# Editor and system files
+.vscode/
+.idea/
+.DS_Store
