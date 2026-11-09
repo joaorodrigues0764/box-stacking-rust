@@ -78,6 +78,7 @@ fn tallest_tower(orientations: &mut [Orientation]) -> (i64, Vec<Orientation>) {
             .then_with(|| right.length.cmp(&left.length))
     });
 
+    // Coordinate compression: assign ranks to the distinct base lengths.
     let mut lengths: Vec<i32> = orientations.iter().map(|block| block.length).collect();
     lengths.sort_unstable();
     lengths.dedup();
