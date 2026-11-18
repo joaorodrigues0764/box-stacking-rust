@@ -3,12 +3,14 @@
 Run from the repository root with Python 3 and Cargo installed:
 
 ```bash
-cargo test
 python3 test-cases/validate.py
 ```
 
 The script builds the release executable and checks its actual standard output.
 It uses only the Python standard library. The default random seed is `2026`.
+
+This is the project's correctness suite. There are currently no Rust unit tests,
+so `cargo test` alone does not validate the solver's behavior.
 
 The independent quadratic oracle enumerates all six rotations and processes them
 by base area. It does not use the Rust implementation's normalized bases,
@@ -21,7 +23,7 @@ The checker also tests itself against deliberately invalid outputs.
 
 Coverage includes:
 
-- The statement examples, repeated dimensions, and signed 32-bit boundary values.
+- Small worked examples, repeated dimensions, and signed 32-bit boundary values.
 - All 285 multisets of one to three types with dimensions from 1 to 3.
 - 2,000 random cases, including many ties and shared dimensions.
 - 100 shuffled cases with permuted input dimensions.
@@ -35,8 +37,8 @@ To use a different seed or an existing executable:
 
 ```bash
 python3 test-cases/validate.py --seed 42 --random-cases 5000
-python3 test-cases/validate.py --binary /tmp/asa-project-tower --skip-stress
+python3 test-cases/validate.py --binary ./target/release/asa_project --skip-stress
 ```
 
-These checks provide evidence of correctness. They do not establish the
-Mooshak time or memory limits and are not performance measurements for the report.
+These checks provide evidence of correctness. They do not measure performance;
+see `benchmarks/README.md` for runtime and memory measurements.
